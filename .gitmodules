@@ -1,0 +1,3 @@
+[submodule "lib/app_config"]
+	path = lib/app_config
+	url = git@github.com:SaaFomenko/app_config.git
