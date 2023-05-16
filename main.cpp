@@ -7,10 +7,11 @@
 int main()
 {
 	const std::string path_conf = "config.txt";
+	std::string connect_str = "";
 
 	try
 	{
-		const std::string connect_str = app_config::get_connect(path_conf);
+		connect_str = app_config::get_connect(path_conf);
 	}
 	catch(std::exception e)
 	{
@@ -19,10 +20,20 @@ int main()
 
 	try
 	{
-		pqxx::connection c(
-		);
+		pqxx::connection c(connect_str);
+
+		pqxx::work tx{ c };
+
+		for (
+					auto [name, publication] : 
+						tx.query<std::string, int>("SELECT name, publication FROM album")
+				)
+		{
+			std::cout << "Альбом \"" << name << "\" был опубликован в: " << publication << " г.\n";
+		}
 	} 
-	catch (pqxx::sql_error e)
+	//catch (pqxx::sql_error e)
+	catch (std::exception e)
 	{
 		std::cout << e.what() << std::endl;
 	}
