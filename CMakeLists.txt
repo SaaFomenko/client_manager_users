@@ -16,10 +16,10 @@ set(PostgreSQL_TYPE_INCLUDE_DIR "/usr/local/pgsql/include/libpq")
 set(add_config_dir "lib/add_config")
 set(add_exception_dir "")
 
-file(GLOB
-	app_config_src "lib/add_config/*.cpp"
-	app_exception_src "lib/add_config/lib/add_exception/*.cpp"
-)
+#file(GLOB
+#	app_config_src "lib/add_config/*.cpp"
+#	app_exception_src "lib/add_config/lib/add_exception/*.cpp"
+#)
 
 add_subdirectory(
 	"../libpqxx/libpqxx-7.7.5" libpqxx-build
@@ -31,11 +31,11 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 #add_library(app_config_lib STATIC ${app_config_src})
 #add_library(app_exception_lib STATIC ${app_exception_src})
 
-add_executable(${PROJECT_NAME}.exe main.cpp 
-	${app_config_src}
-	${app_exception_src})
+add_executable(${PROJECT_NAME}.exe main.cpp)
+#	${app_config_src}
+#	${app_exception_src})
 
 
 #target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 #target_link_libraries(${PROJECT_NAME}.exe ${PROJECT_NAME}_lib libpqxx-build)
-target_link_libraries(${PROJECT_NAME}.exe app_config_lib app_exception_lib pqxx)
+target_link_libraries(${PROJECT_NAME}.exe file_to_string_lib app_exception_lib pqxx)
