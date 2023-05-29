@@ -6,8 +6,8 @@
 
 int main()
 {
-	const std::string path_conf = "config.txt";
-	const std::string path_create_table = "../create_tb.sql";
+	const std::string path_conf = "connect_db.txt";
+//	const std::string path_create_table = "../create_tb.sql";
 	std::string sql_str = "";
 //	const std::string sql_str;
 	std::string connect_str = "";
@@ -16,7 +16,9 @@ int main()
 	{
 		//connect_str = app_config::get_connect(path_conf);
 		connect_str = file_to_string(path_conf);
-		sql_str = file_to_string(path_create_table);
+//		sql_str = file_to_string(path_create_table);
+
+		std::cout << connect_str << "\n";
 	}
 	catch(std::exception e)
 	{
@@ -27,15 +29,19 @@ int main()
 	{
 		pqxx::connection c(connect_str);
 
-//		pqxx::work tx{ c };
+		pqxx::work tx{ c };
 
-		pqxx::work txb{ c };
+		const char* dbname = tx.query_value<const char*>("SELECT curent_database()");
 
+		std::cout << "Wellcom you connected to database: " << dbname << "\n";
+
+//		pqxx::work txb{ c };
+/*
 		txb.exec0(sql_str);
 		txb.commit();
 
 		std::cout << "Tables will be create.\n";
-/*
+
 		for (
 					auto [name, publication] : 
 						tx.query<std::string, int>("SELECT name, publication FROM album")
@@ -46,7 +52,7 @@ int main()
 */
 
 	} 
-	catch (pqxx::sql_error e)
+	catch (pqxx::failure e)
 	{
 		std::cout << e.what() << std::endl;
 	}
