@@ -38,4 +38,4 @@ add_executable(${PROJECT_NAME}.exe main.cpp)
 
 #target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 #target_link_libraries(${PROJECT_NAME}.exe ${PROJECT_NAME}_lib libpqxx-build)
-target_link_libraries(${PROJECT_NAME}.exe file_to_string_lib pqxx)
+target_link_libraries(${PROJECT_NAME}.exe my_file_lib pqxx)

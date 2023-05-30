@@ -1,1 +1,1 @@
-add_subdirectory(file_to_string)
+add_subdirectory(my_file)

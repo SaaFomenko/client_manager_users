@@ -2,3 +2,6 @@
 	path = lib/file_to_string
 	url = git@github.com:SaaFomenko/file_to_string.git
 
+[submodule "lib/my_file"]
+	path = lib/my_file
+	url = git@github.com:SaaFomenko/my_file.git
