@@ -6,6 +6,36 @@
 #include "lib/my_file/my_file.h"
 
 
+std::string& variant_string(std::string& orig_str, std::string& def_str)
+{
+	if (def_str.length() == 0)
+	{
+		return def_str;
+	}
+	else
+	{
+		return orig_str;
+	}
+}
+
+void dialog(
+	std::vector<std::string>& quest, 
+	std::map<std::string, std::string>& response
+	)
+{
+	unsigned int i = 0;
+	for ( const auto elem : response)
+	{
+		if (response[elem.first] == "password")
+		{
+			const char* pass_quest = quest[i].c_str();
+			response[elem.first] = getpass(pass_quest);
+		}
+		std::cout << quest[i];
+		std::getline(std::cin, response[elem.first]);
+	}
+}
+
 int main()
 {
 	const char* path_connect = "connect_db.txt";
@@ -13,22 +43,32 @@ int main()
 	const char* quest_create_file = "You do want create new file? (y/n): ";
 	const char* enter_connect_params = "Enter params for connect DB:\n";
 
-	const unsigned int size_connect_params = 64; 
-	const unsigned int buff_size = 1024; 
-	const char* local_host = "localhost";
-	const char* default_port = "5432";
-	const char* host_quest = "host=(default: localhost): ";
-	const char* host_param = "host=";
-	const char* port_quest = "port=(default: 5432): ";
-	const char* port_param = "port=";
-	const char* name_quest = "dbname=";
-	const char* user_quest = "user=";
-	const char* password_quest = "password=";
+	const std::string str_divider = " ";
+	const std::string file_divider = "\n";
+	const std::string quest_divider = ": ";
+	const std::string param_divider = "=";
+	const std::string local_host = "localhost";
+	const std::string default_port = "5432";
+	const std::string host_param = "host";
+	const std::string host_quest = host_param + "(default: " + local_host + "): ";
+	const std::string port_param = "port";
+	const std::string port_quest = port_param + "(default: " + default_port + "): ";
+	const std::string name_quest = "dbname";
+	const std::string user_quest = "user";
+	const std::string password_quest = "password";
+	std::vector<std::string> connect_lable{
+		host_quest,
+		port_quest,
+		name_quest,
+		user_quest,
+		password_quest,
+	};
+
+	std::string concat_str = host_param;
 //	const std::string path_create_table = "../create_tb.sql";
 //	std::string sql_str = "";
 //	const std::string sql_str;
 	const char* connect_str;
-	char temp[buff_size] = "host=";
 
 	try
 	{
@@ -61,34 +101,29 @@ int main()
 			}
 		} while (!isRw);
 
-		std::string host_in;
-		std::string port_in;
-		char dbname_in[size_connect_params]{};
-		char dbuser_in[size_connect_params]{};
-		char dbuser_in[size_connect_params]{};
+		std::map<std::string, std::string> connect_param{
+			{host_param, ""},
+			{port_param, ""},
+			{name_quest, ""},
+			{user_quest, ""},
+			{password_quest, ""},
+		};
 
 		std::cout << enter_connect_params;
-		std::cout << host_quest;
-		std::getline(std::cin, host_in);
-		std::cout << port_quest;
-		std::getline(std::cin, port_in);
-		std::cout << name_quest;
-		std::cin >> dbname_in;
-		std::cout << user_quest;
-		std::cin >> dbuser_in;
-		const char* pass_in = getpass(password_quest);
+		dialog(connect_lable, connect_param);
 
-		strcat(temp, host_param);
-		if (host_in.length() == 0)
+		concat_str += variant_string(host_in, local_host);
+		concat_str += str_divider + default_port;
+		concat_str += variant_string(port_in, default_port);
+		concat_str += str_divider + name_quest;
+		concat_str += dbname_in + str_divider;
+		concat_str += user_quest + dbuser_in + str_divider;
+		concat_str += password_quest + pass_in;
+
+		connect_str = concat_str.c_str();
+		try
 		{
-			strcat(temp, local_host);
-			strcat(temp, " ");
-		}
-		else
-		{
-			const char* hostname = host_in.c_str();
-			strcat(temp, hostname);
-			strcat(temp, " ");
+			MyFile file_out(path_connect, true);
 		}
 	}
 
