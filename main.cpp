@@ -6,6 +6,13 @@
 #include "lib/my_file/my_file.h"
 
 
+enum 
+{
+		lable = 0,
+		key,
+		value,
+};
+
 std::string& variant_string(std::string& orig_str, std::string& def_str)
 {
 	if (def_str.length() == 0)
@@ -18,36 +25,52 @@ std::string& variant_string(std::string& orig_str, std::string& def_str)
 	}
 }
 
-std::string map_to_stp(
-	std::map<std::string, std::string>& dict,
+std::string table_to_str(
+	std::vector<std::vector<std::string>>& table,
 	const std::string& div_row,
 	const std::string& div_col
 	)
 {
 	std::string str = "";
-	for (auto elem : dict)
+	for (std::vector<std::string>& elem : table)
 	{
-		str += elem.first + div_col + elem.second + div_row;
+		str += elem[key] + div_col + elem[value] + div_row;
 	}
 
 	return str;
 }
 
 void dialog(
-	std::vector<std::string>& quest, 
-	std::map<std::string, std::string>& response
+	std::vector<std::vector<std::string>>& quest
 	)
 {
-	unsigned int i = 0;
-	for ( const auto elem : response)
+	if(char(std::cin.peek()) == '\n')
+    	std::cin.ignore();
+
+	if (std::cin.fail()) 
 	{
-		if (response[elem.first] == "password")
+    	std::cin.clear();
+    	std::cin.ignore(32767, '\n');
+	}
+
+	for ( std::vector<std::string>& elem : quest)
+	{
+		if (elem[key] == "password")
 		{
-			const char* pass_quest = quest[i].c_str();
-			response[elem.first] = getpass(pass_quest);
+			const char* pass_quest = elem[lable].c_str();
+			elem[value] = getpass(pass_quest);
 		}
-		std::cout << quest[i];
-		std::getline(std::cin, response[elem.first]);
+		else
+		{
+			std::string temp = elem[value];
+			std::cout << elem[lable];
+			std::getline(std::cin, elem[value]);
+
+			if (elem[value].length() == 0)
+			{
+				elem[value] = temp;
+			}
+		}
 	}
 }
 
@@ -57,6 +80,7 @@ int main()
 	const char* err_connect_file = "File not exist, or heve fail parametres.";
 	const char* quest_create_file = "You do want create new file? (y/n): ";
 	const char* enter_connect_params = "Enter params for connect DB:\n";
+	const char* greet_msg = "Wellcom, you connected to database: ";
 
 	const std::string str_divider = " ";
 	const std::string file_divider = "\n";
@@ -68,27 +92,26 @@ int main()
 	const std::string host_quest = host_param + "(default: " + local_host + "): ";
 	const std::string port_param = "port";
 	const std::string port_quest = port_param + "(default: " + default_port + "): ";
-	const std::string name_quest = "dbname";
-	const std::string user_quest = "user";
-	const std::string password_quest = "password";
-	std::vector<std::string> connect_lable{
-		host_quest,
-		port_quest,
-		name_quest,
-		user_quest,
-		password_quest,
+	const std::string name_quest = "dbname: ";
+	const std::string user_quest = "user: ";
+	const std::string password_quest = "password: ";
+	std::vector<std::vector<std::string>> connect_quests{
+		{host_quest, host_param, local_host},
+		{port_quest, port_param, default_port},
+		{name_quest, "dbname", ""},
+		{user_quest, "user", ""},
+		{password_quest, "password", ""},
 	};
 
-	std::string concat_str = host_param;
 //	const std::string path_create_table = "../create_tb.sql";
 //	std::string sql_str = "";
 //	const std::string sql_str;
-	const char* connect_str;
+	std::string str;
 
 	try
 	{
 		MyFile file_read(path_connect);
-		connect_str = file_read.to_str();
+		str = file_read.to_str();
 	}
 	catch(std::exception& e)
 	{
@@ -116,17 +139,9 @@ int main()
 			}
 		} while (!isRw);
 
-		std::map<std::string, std::string> connect_param{
-			{host_param, ""},
-			{port_param, ""},
-			{name_quest, ""},
-			{user_quest, ""},
-			{password_quest, ""},
-		};
-
 		std::cout << enter_connect_params;
-		dialog(connect_lable, connect_param);
-		std::string str = map_to_stp(connect_param, file_divider, param_divider);
+		dialog(connect_quests);
+		str = table_to_str(connect_quests, file_divider, param_divider);
 
 		try
 		{
@@ -137,17 +152,18 @@ int main()
 			std::cout << e.what() << '\n';
 		}
 
-		connect_str = str.c_str();
+		str = table_to_str(connect_quests, str_divider, param_divider);
 	}
 
 	try
 	{
+		const char* connect_str = str.c_str();
 		pqxx::connection c(connect_str);
 
 		pqxx::work tx{ c };
 
 		const char* dbname = tx.query_value<const char*>("SELECT current_database()");
-		std::cout << "Wellcom you connected to database: " << dbname << "\n";
+		std::cout << greet_msg << dbname << "\n";
 
 
 //		pqxx::work txb{ c };
