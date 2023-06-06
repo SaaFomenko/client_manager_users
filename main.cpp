@@ -18,6 +18,21 @@ std::string& variant_string(std::string& orig_str, std::string& def_str)
 	}
 }
 
+std::string map_to_stp(
+	std::map<std::string, std::string>& dict,
+	const std::string& div_row,
+	const std::string& div_col
+	)
+{
+	std::string str = "";
+	for (auto elem : dict)
+	{
+		str += elem.first + div_col + elem.second + div_row;
+	}
+
+	return str;
+}
+
 void dialog(
 	std::vector<std::string>& quest, 
 	std::map<std::string, std::string>& response
@@ -111,20 +126,18 @@ int main()
 
 		std::cout << enter_connect_params;
 		dialog(connect_lable, connect_param);
+		std::string str = map_to_stp(connect_param, file_divider, param_divider);
 
-		concat_str += variant_string(host_in, local_host);
-		concat_str += str_divider + default_port;
-		concat_str += variant_string(port_in, default_port);
-		concat_str += str_divider + name_quest;
-		concat_str += dbname_in + str_divider;
-		concat_str += user_quest + dbuser_in + str_divider;
-		concat_str += password_quest + pass_in;
-
-		connect_str = concat_str.c_str();
 		try
 		{
-			MyFile file_out(path_connect, true);
+			MyFile file_out(path_connect, str);
 		}
+		catch (std::exception e)
+		{
+			std::cout << e.what() << '\n';
+		}
+
+		connect_str = str.c_str();
 	}
 
 	try
@@ -133,9 +146,9 @@ int main()
 
 		pqxx::work tx{ c };
 
-		const char* dbname = tx.query_value<const char*>("SELECT curent_database()");
-
+		const char* dbname = tx.query_value<const char*>("SELECT current_database()");
 		std::cout << "Wellcom you connected to database: " << dbname << "\n";
+
 
 //		pqxx::work txb{ c };
 /*
