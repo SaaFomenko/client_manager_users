@@ -2,7 +2,6 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
-#include <pqxx/pqxx>
 #include "lib/my_file/my_file.h"
 
 
@@ -78,9 +77,13 @@ int main()
 {
 	const char* path_connect = "connect_db.txt";
 	const char* err_connect_file = "File not exist, or heve fail parametres.";
-	const char* quest_create_file = "You do want create new file? (y/n): ";
+	const char* quest_create_file = "You do want create file with params connect_db.txt? (y/n): ";
 	const char* enter_connect_params = "Enter params for connect DB:\n";
 	const char* greet_msg = "Wellcom, you connected to database: ";
+	const char* tables_lable = "The database has tables: ";
+
+	const char* name_db_query = "SELECT current_database()";
+	const char* table_name_query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
 
 	const std::string str_divider = " ";
 	const std::string file_divider = "\n";
@@ -126,7 +129,7 @@ int main()
 			std::cin >> assent;
 			if (assent == 'n')
 			{
-				return 0;
+				break;
 			}
 			if (assent == 'y')
 			{
@@ -143,13 +146,16 @@ int main()
 		dialog(connect_quests);
 		str = table_to_str(connect_quests, file_divider, param_divider);
 
-		try
+		if (isRw)
 		{
-			MyFile file_out(path_connect, str);
-		}
-		catch (std::exception e)
-		{
-			std::cout << e.what() << '\n';
+			try
+			{
+				MyFile file_out(path_connect, str);
+			}
+			catch (std::exception e)
+			{
+				std::cout << e.what() << '\n';
+			}
 		}
 
 		str = table_to_str(connect_quests, str_divider, param_divider);
@@ -162,9 +168,18 @@ int main()
 
 		pqxx::work tx{ c };
 
-		const char* dbname = tx.query_value<const char*>("SELECT current_database()");
+		const char* dbname = tx.query_value<const char*>(name_db_query);
 		std::cout << greet_msg << dbname << "\n";
 
+		std::cout << tables_lable << '\n';
+
+		unsigned int i = 0;
+		for (auto [ table_name ] : 
+			tx.query<const char*>(table_name_query))
+		{
+			std::cout << i << ". " << table_name << '\n';
+			++i;
+		}
 
 //		pqxx::work txb{ c };
 /*

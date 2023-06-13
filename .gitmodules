@@ -1,3 +1,6 @@
 [submodule "lib/my_file"]
 	path = lib/my_file
 	url = git@github.com:SaaFomenko/my_file.git
+[submodule "lib/pqman"]
+	path = lib/pqman
+	url = git@github.com:SaaFomenko/pqman.git
