@@ -1,2 +1,5 @@
+add_subdirectory(contacts)
+add_subdirectory(dialog)
 add_subdirectory(my_file)
 add_subdirectory(pqman)
+add_subdirectory(user)

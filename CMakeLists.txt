@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.18)
 
-project(client_manager_users)
+project(contacts)
 
 # set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
