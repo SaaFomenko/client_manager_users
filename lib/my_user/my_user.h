@@ -29,6 +29,7 @@ namespace my
             std::string name;
             std::unique_ptr<std::string> pass_hash;
         public:
+            User();
             User(const std::string name, const std::string* pass_hash);
             virtual ~User();
 
